@@ -57,9 +57,9 @@ class User extends Authenticatable
         return $this->belongsToMany(Classroom::class, 'classroom_user', 'user_id', 'classroom_id');
     }
 
-    // Di model User.php
+    
     public function classrooms()
     {
-        return $this->hasMany(Classroom::class, 'teacher_id');
+        return $this->belongsToMany(Classroom::class, 'enroll', 'student_id', 'classroom_id');
     }
 }

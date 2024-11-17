@@ -31,7 +31,7 @@ class ClassroomResource extends Resource
                 TextInput::make('name')->required(),
                 Select::make('teacher_id')
                     ->label('Teacher')
-                    ->relationship('teacher', 'name') // Menampilkan nama guru
+                    ->relationship('teacher', 'name') 
                     ->options(User::where('role', 'teacher')->pluck('name', 'id'))
                     ->searchable()
                     ->required(),

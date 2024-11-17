@@ -86,4 +86,16 @@ return [
 
     'livewire_loading_delay' => 'default',
 
+    // Konfigurasi lainnya...
+
+    /*
+    |--------------------------------------------------------------------------
+    | Dark Mode
+    |--------------------------------------------------------------------------
+    |
+    | Set dark_mode to true to enable dark mode by default.
+    |
+    */
+    'dark_mode' => false,
+
 ];

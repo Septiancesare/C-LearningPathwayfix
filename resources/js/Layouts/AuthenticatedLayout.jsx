@@ -9,7 +9,6 @@ import { useState } from "react";
 export default function Authenticated({ header, children }) {
     const user = usePage().props.auth.user;
 
-
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
         useState(false);
 
@@ -32,7 +31,6 @@ export default function Authenticated({ header, children }) {
                         </div>
 
                         <div className="profile-container flex b">
-                            
                             <div className="hidden sm:ms-6 sm:flex sm:items-center">
                                 <div className="relative ms-3">
                                     <Dropdown>

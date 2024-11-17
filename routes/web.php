@@ -7,6 +7,7 @@ use Illuminate\Foundation\Application;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\ClassroomController;
+use App\Http\Controllers\EnrollmentController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -28,19 +29,29 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+Route::middleware('auth')->group(function () {
+    //student
+    Route::get('/classrooms/join', [StudentController::class, 'showJoinForm'])->name('classrooms.join.form');
+    Route::post('/classrooms/join', [StudentController::class, 'joinClassroom'])->name('classrooms.join');
+    // Route untuk halaman detail kelas
+    Route::get('/classrooms/page/{classroom}', [ClassroomController::class, 'showPage'])->name('classrooms.show.page');
+});
+
+Route::get('/enrollments', [EnrollmentController::class, 'index'])->middleware('auth');
+Route::get('/classrooms/teacher/{teacherId}', [ClassroomController::class, 'getClassroomsByTeacher']);
+
+
+
 // Classroom 
 Route::resource('classrooms', ClassroomController::class)->middleware(['auth']);
 Route::middleware('auth')->group(function () {
+    //teacher
     Route::get('/classrooms/create', [ClassroomController::class, 'create'])->name('classrooms.create');
     Route::post('/classrooms', [ClassroomController::class, 'store'])->name('classrooms.store');
-    Route::get('/classrooms/join', [StudentController::class, 'showJoinForm'])->name('classrooms.join.form');
-    Route::post('/classrooms/join', [StudentController::class, 'joinClassroom'])->name('classrooms.join');
 });
 Route::middleware('auth:api')->get('/classrooms/teacher', [ClassroomController::class, 'getTeacherClassrooms']);
 
-Route::middleware(['auth'])->group(function () {
-    Route::get('/classrooms/join', [StudentController::class, 'showJoinForm'])->name('classrooms.join.form');
-    Route::post('/classrooms/join', [StudentController::class, 'joinClassroom'])->name('classrooms.join');
-});
+
+
 
 require __DIR__ . '/auth.php';

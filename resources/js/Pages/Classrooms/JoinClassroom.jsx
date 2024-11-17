@@ -4,11 +4,11 @@ import Authenticated from "@/Layouts/AuthenticatedLayout";
 import { Link } from "@inertiajs/react";
 
 export default function JoinClassroom() {
-    const [enrollCode, setEnrollCode] = useState("");
+    const [enrollkey, setEnrollCode] = useState("");
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        Inertia.post("/classrooms/join", { enroll_code: enrollCode });
+        Inertia.post("/classrooms/join", { enroll_code: enrollkey });
     };
 
     return (
@@ -23,7 +23,7 @@ export default function JoinClassroom() {
                             <label className="block text-lg">Enroll Code</label>
                             <input
                                 type="text"
-                                value={enrollCode}
+                                value={enrollkey}
                                 onChange={(e) => setEnrollCode(e.target.value)}
                                 className="w-full p-2 border rounded"
                                 required

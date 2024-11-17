@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Request;
 
 class Classroom extends Model
 {
@@ -22,13 +23,45 @@ class Classroom extends Model
      */
     public function students()
     {
-        return $this->belongsToMany(User::class, 'classroom_user', 'classroom_id', 'user_id');
+        return $this->belongsToMany(User::class, 'enroll', 'classroom_id', 'student_id');
     }
 
+    public function enrollments()
+    {
+        return $this->hasMany(Enrollment::class);
+    }
+
+    public function materials()
+    {
+        return $this->hasMany(Material::class); 
+    }
+
+    // Relasi dengan tugas
+    public function tasks()
+    {
+        return $this->hasMany(Task::class); 
+    }
+
+    public function indexForTeacher(Request $request)
+    {
+        $user = $request->user();
+
+        if ($user->role !== 'teacher') {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $classrooms = Classroom::where('teacher_id', $user->id)->get();
+
+        return response()->json($classrooms);
+    }
+
+
+
+
     protected static function booted()
-{
-    static::creating(function ($classroom) {
-        $classroom->enrollkeyment = strtoupper(bin2hex(random_bytes(3))); // 6 karakter acak
-    });
-}
+    {
+        static::creating(function ($classroom) {
+            $classroom->enrollkeyment = strtoupper(bin2hex(random_bytes(3))); // 6 karakter acak
+        });
+    }
 }
