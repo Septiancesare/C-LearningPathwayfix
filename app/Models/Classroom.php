@@ -33,13 +33,13 @@ class Classroom extends Model
 
     public function materials()
     {
-        return $this->hasMany(Material::class); 
+        return $this->hasMany(Material::class);
     }
 
     // Relasi dengan tugas
     public function tasks()
     {
-        return $this->hasMany(Task::class); 
+        return $this->hasMany(Task::class);
     }
 
     public function indexForTeacher(Request $request)

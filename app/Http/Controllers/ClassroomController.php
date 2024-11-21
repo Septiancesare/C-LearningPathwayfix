@@ -13,7 +13,7 @@ class ClassroomController extends Controller
     public function index()
     {
         $auth = Auth::user();
-        $classrooms = $auth->classrooms;  
+        $classrooms = $auth->classrooms;
 
         return inertia('Dashboard', [
             'classrooms' => $classrooms,
@@ -44,7 +44,25 @@ class ClassroomController extends Controller
 
     public function create()
     {
-        return inertia('Classrooms/CreateClassroom'); 
+        return inertia('Classrooms/CreateClassroom');
+    }
+
+    public function destroy($id)
+    {
+        $classroom = Classroom::find($id);
+
+        if (!$classroom) {
+            return response()->json(['message' => 'Classroom not found'], 404);
+        }
+
+        // Optional: Add authorization check here
+        if (Auth::user()->role !== 'teacher') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $classroom->delete();
+
+        return response()->json(['message' => 'Classroom deleted successfully'], 200);
     }
 
     public function getTeacherClassrooms()
@@ -70,19 +88,18 @@ class ClassroomController extends Controller
         $classroom = Classroom::with(['teacher', 'students'])->findOrFail($id);
 
         $user = Auth::user();
-        $studentClassrooms = $user->classrooms; 
+        $studentClassrooms = $user->classrooms;
 
         if ($user->role === 'student') {
-            $classrooms = $user->enrolledClassrooms; // Relasi untuk kelas yang diikuti
+            $classrooms = $user->enrolledClassrooms;
         } elseif ($user->role === 'teacher') {
-            $classrooms = $user->createdClassrooms; // Relasi untuk kelas yang dibuat
+            $classrooms = $user->createdClassrooms;
         }
-    
+
 
         return Inertia::render('Classrooms/ClassroomPage', [
             'classroom' => $classroom,
             'studentClassrooms' => $studentClassrooms
         ]);
     }
-
 }
