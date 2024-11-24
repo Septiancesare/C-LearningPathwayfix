@@ -8,8 +8,8 @@ export default function ChatPage({ classId }) {
 
     return (
         <Authenticated>
-            <div className="container mx-auto p-10">
-                <h2 className="text-2xl font-bold">Group Chat</h2>
+            <div className="container mx-auto p-10 text-center ">
+                <h2 className="text-2xl font-bold">Group Chat </h2>
 
                 {/* ChatComponent renders the chat interface */}
                 <ChatComponent classId={classId} />

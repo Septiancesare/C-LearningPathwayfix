@@ -7,8 +7,8 @@ import Authenticated from "@/Layouts/AuthenticatedLayout";
 
 const CreateMaterial = ({ classroomId }) => {
     const [editorContent, setEditorContent] = useState("");
-    const quillRef = useRef(null);
-    
+    const quillRef = useRef(null); // Reference for ReactQuill
+    const [isSubmitting, setIsSubmitting] = useState(false); // Loading state
 
     const handleImageUpload = async (file) => {
         const formData = new FormData();
@@ -20,10 +20,15 @@ const CreateMaterial = ({ classroomId }) => {
                     "Content-Type": "multipart/form-data",
                 },
             });
-            const fileUrl = response.data.url;
-            const quill = quillRef.current.getEditor();
-            const range = quill.getSelection();
-            quill.insertEmbed(range.index, "image", fileUrl);
+
+            if (response.data.url) {
+                const fileUrl = response.data.url;
+                const quill = quillRef.current.getEditor();
+                const range = quill.getSelection();
+                quill.insertEmbed(range.index, "image", fileUrl);
+            } else {
+                console.error("No URL returned from the server.");
+            }
         } catch (error) {
             console.error("Error uploading image:", error);
         }
@@ -42,15 +47,19 @@ const CreateMaterial = ({ classroomId }) => {
     };
 
     const handleSubmit = async () => {
+        setIsSubmitting(true); // Set loading state
         try {
-            const response = await axios.post(`/classrooms/${classroomId}/materials/store`, {
-                material_title: "New Material", // Tambahkan title sesuai kebutuhan
+            await axios.post(`/classrooms/${classroomId}/materials/store`, {
+                material_title: "New Material",
                 class_id: classroomId,
                 materials_data: editorContent,
             });
             alert("Material berhasil disimpan!");
         } catch (error) {
             console.error("Error submitting material:", error);
+            alert("Terjadi kesalahan saat menyimpan material.");
+        } finally {
+            setIsSubmitting(false); // Reset loading state
         }
     };
 
@@ -65,15 +74,23 @@ const CreateMaterial = ({ classroomId }) => {
     return (
         <Authenticated>
             <div className="mx-10 my-3">
-                <h1 className="my-3 text-xl flex justify-center">Create New Material</h1>
-                <div {...getRootProps()} className="border border-dashed border-gray-400 p-4 text-center">
+                <h1 className="my-3 text-xl flex justify-center">
+                    Create New Material
+                </h1>
+                <div
+                    {...getRootProps()}
+                    className="border border-dashed border-gray-400 p-4 text-center"
+                >
                     <input {...getInputProps()} />
-                    <p>Drag 'n' drop some files here, or click to select files</p>
+                    <p>
+                        Drag 'n' drop some files here, or click to select files
+                    </p>
                 </div>
                 <ReactQuill
                     ref={quillRef}
                     value={editorContent}
                     onChange={handleEditorChange}
+                    placeholder="Write your material here..."
                     modules={{
                         toolbar: [
                             [{ header: "1" }, { header: "2" }, { font: [] }],
@@ -86,6 +103,7 @@ const CreateMaterial = ({ classroomId }) => {
                         ],
                     }}
                 />
+
                 <div className="flex justify-between mt-4">
                     <button
                         className="bg-gray-500 text-white px-4 py-2 rounded"
@@ -101,10 +119,13 @@ const CreateMaterial = ({ classroomId }) => {
                             Cancel
                         </button>
                         <button
-                            className="bg-green-500 text-white px-4 py-2 rounded"
+                            className={`bg-green-500 text-white px-4 py-2 rounded ${
+                                isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+                            }`}
                             onClick={handleSubmit}
+                            disabled={isSubmitting}
                         >
-                            Submit
+                            {isSubmitting ? "Submitting..." : "Submit"}
                         </button>
                     </div>
                 </div>

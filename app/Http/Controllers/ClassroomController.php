@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Task;
 use Inertia\Inertia;
+use App\Models\Material;
 use App\Models\Classroom;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
 class ClassroomController extends Controller
@@ -34,10 +37,15 @@ class ClassroomController extends Controller
         return redirect()->route('dashboard');
     }
 
-    public function show(Classroom $classroom)
+    public function show($id)
     {
-        $classroom->load('students');
-        return inertia('Classrooms/Classroom', ['classroom' => $classroom]);
+
+        $classroom = Classroom::with(['materials', 'tasks', 'teachers'])->findOrFail($id);
+        $materials = Material::where('class_id', $classroom)->get();
+        $tasks = Task::where('classroom_id', $classroom)->get();
+
+
+        return response()->json($classroom, $tasks, $materials);
     }
 
 
@@ -101,5 +109,25 @@ class ClassroomController extends Controller
             'classroom' => $classroom,
             'studentClassrooms' => $studentClassrooms
         ]);
+    }
+
+    public function showStudents($id)
+    {
+        // Ambil classroom berdasarkan ID
+        $classroom = Classroom::with('students')->findOrFail($id);
+
+        // Return view dan kirimkan data classroom beserta siswa yang terdaftar
+        return inertia('Classrooms/ShowStudent', ['classroom' => $classroom]);
+    }
+
+    public function removeStudent($classroomId, $studentId)
+    {
+        // Hapus relasi user dari kelas (misalnya tabel 'classroom_students')
+        DB::table('enroll')
+            ->where('classroom_id', $classroomId)
+            ->where('student_id', $studentId)
+            ->delete();
+
+        return redirect()->back()->with('success', 'Student removed from the classroom.');
     }
 }

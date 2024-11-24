@@ -13,10 +13,13 @@ class Classroom extends Model
     /**
      * Relationship to the teacher (user with role "teacher").
      */
+    // In your Classroom model (app/Models/Classroom.php)
+
     public function teacher()
     {
-        return $this->belongsTo(User::class, 'teacher_id');
+        return $this->belongsTo(Teacher::class, 'teacher_id');
     }
+
 
     /**
      * Relationship to students (users with role "student").
@@ -33,14 +36,16 @@ class Classroom extends Model
 
     public function materials()
     {
-        return $this->hasMany(Material::class);
+        return $this->hasMany(Material::class, 'class_id');
     }
+
 
     // Relasi dengan tugas
     public function tasks()
     {
-        return $this->hasMany(Task::class);
+        return $this->hasMany(Task::class, 'classroom_id');
     }
+
 
     public function indexForTeacher(Request $request)
     {

@@ -15,8 +15,9 @@ class Task extends Model
 
     public function classroom()
     {
-        return $this->belongsTo(Classroom::class);
+        return $this->belongsTo(Classroom::class, 'classroom_id');
     }
+
 
     public function submissions()
     {

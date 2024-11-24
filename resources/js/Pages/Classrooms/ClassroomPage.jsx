@@ -5,6 +5,7 @@ import Authenticated from "@/Layouts/AuthenticatedLayout";
 export default function ClassroomPage() {
     const { classroom } = usePage().props;
     const { user } = usePage().props.auth;
+    
 
     {
         classroom ? (
@@ -164,6 +165,13 @@ export default function ClassroomPage() {
                                             >
                                                 <div className="bg-white px-7 py-2 mx-3 text-blue-600 border-2 rounded-lg hover:text-white hover:bg-transparent hover:border-2">
                                                     Add Task
+                                                </div>
+                                            </Link>
+                                            <Link
+                                                href={`/classrooms/${classroom.id}/students`}
+                                            >
+                                                <div className="bg-white px-7 py-2 mx-3 text-blue-600 border-2 rounded-lg hover:text-white hover:bg-transparent hover:border-2">
+                                                    All Student
                                                 </div>
                                             </Link>
                                             <button

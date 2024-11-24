@@ -34,12 +34,12 @@ class MaterialController extends Controller
     // Menyimpan materi baru ke database
     public function store(Request $request, $classId)
     {
+        $classroom = Classroom::findOrFail($classId); // Pastikan kelas valid
+
         $request->validate([
             'material_title' => 'required|string|max:255',
             'materials_data' => 'required|string',
         ]);
-
-        $classroom = Classroom::findOrFail($classId);
 
         Material::create([
             'classroom_id' => $classId,
@@ -47,8 +47,10 @@ class MaterialController extends Controller
             'materials_data' => $request->materials_data,
         ]);
 
-        return redirect()->route('materials.index', $classId)->with('success', 'Material created successfully.');
+        return redirect()->route('materials.index', ['classId' => $classId])
+            ->with('success', 'Material created successfully.');
     }
+
 
     // Menampilkan materi tertentu
     public function show($id)

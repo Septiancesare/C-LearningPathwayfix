@@ -3,15 +3,36 @@ import React, { useState, useEffect } from "react";
 const ChatComponent = ({ classId }) => {
     const [chats, setChats] = useState([]); // Initialize as an empty array
     const [newMessage, setNewMessage] = useState("");
-    const currentUserId = 1; // Replace with actual user ID from context or props
+    const [currentUserId, setCurrentUserId] = useState(null); // Set to null initially
 
     useEffect(() => {
-        fetchChats();
-    }, []); // Empty dependency array to fetch chats only once when component mounts
+        fetchUser(); // Fetch user on component mount
+        fetchChats(); // Fetch chats
+    }, []);
 
+    const fetchUser = async () => {
+        try {
+            const response = await fetch("/api/user", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to fetch user data");
+            }
+
+            const data = await response.json();
+            console.log("Current user data:", data);
+            setCurrentUserId(data.id); // Assuming `id` is the user ID
+        } catch (error) {
+            console.error("Error fetching user:", error);
+        }
+    };
     const fetchChats = async () => {
         try {
-            const response = await fetch(`/classrooms/${classId}/chats`, {
+            const response = await fetch(`/classrooms/${classId}/chats/data`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -51,6 +72,9 @@ const ChatComponent = ({ classId }) => {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": document
+                        .querySelector('meta[name="csrf-token"]')
+                        .getAttribute("content"), // Fetch CSRF token
                 },
                 body: JSON.stringify({
                     message: newMessage,
@@ -64,10 +88,9 @@ const ChatComponent = ({ classId }) => {
             const data = await response.json();
             console.log("Message sent:", data);
 
-            // Ensure the response data is valid before updating the state
             if (data && data.id) {
-                setChats((prevChats) => [...prevChats, data]); // Add new chat message to the state
-                setNewMessage(""); // Clear the input after sending
+                setChats((prevChats) => [...prevChats, data]);
+                setNewMessage("");
             } else {
                 console.error("Invalid response format:", data);
             }
@@ -89,21 +112,38 @@ const ChatComponent = ({ classId }) => {
                             key={chat.id}
                             className={`flex mb-4 ${
                                 chat.user_id === currentUserId
-                                    ? "justify-end"
-                                    : "justify-start"
+                                    ? "justify-end" // Pesan dari user sendiri
+                                    : "justify-start" // Pesan dari user lain
                             }`}
                         >
                             <div
-                                className={`max-w-xs p-4 rounded-lg shadow-md ${
+                                className={`max-w-xs p-4  shadow-md ${
                                     chat.user_id === currentUserId
-                                        ? "bg-blue-500 text-white"
-                                        : "bg-gray-200 text-gray-900"
+                                        ? "bg-blue-500 rounded-tl-3xl rounded-br-3xl rounded-bl-3xl  text-white text-end" // Warna dan alignment pesan user sendiri
+                                        : "bg-blue-100 rounded-tr-3xl rounded-br-3xl rounded-bl-3xl text-gray-900 text-start" // Warna dan alignment pesan user lain
                                 }`}
                             >
-                                <div className="text-sm font-semibold">
+                                {/* Nama Pengirim */}
+                                <div
+                                    className={`text-sm font-semibold ${
+                                        chat.user_id === currentUserId
+                                            ? "text-start"
+                                            : "text-start"
+                                    }`}
+                                >
                                     {chat.user.name} - {chat.user.role}
                                 </div>
-                                <div className="mt-2">{chat.message}</div>
+
+                                {/* Pesan */}
+                                <div
+                                    className={`text-sm pt-1 ${
+                                        chat.user_id === currentUserId
+                                            ? "text-start"
+                                            : "text-start"
+                                    }`}
+                                >
+                                    {chat.message}
+                                </div>
                             </div>
                         </div>
                     ))

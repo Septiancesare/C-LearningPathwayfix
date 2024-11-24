@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -50,14 +51,18 @@ Route::middleware('auth')->group(function () {
 });
 
 
-// Routes untuk Chat Group dalam Classroom (untuk siswa dan guru yang enroll)
 Route::middleware('auth')->group(function () {
-    Route::get('/classrooms/{classId}/chats', [ChatController::class, 'index'])->name('chats.index');
+    Route::get('/classrooms/{classId}/chats/data', [ChatController::class, 'index'])->name('chats.index'); // Untuk data API
 
-    Route::post('/classrooms/{classId}/chats', [ChatController::class, 'store'])->name('chats.store');
+    Route::post('/classrooms/{classId}/chats', [ChatController::class, 'store'])->name('chats.store'); // Untuk mengirim pesan
 
-    Route::get('/classrooms/{classId}/chats', [ChatController::class, 'showChat']);
+    Route::get('/classrooms/{classId}/chats', [ChatController::class, 'showChat'])->name('chats.show'); // Untuk halaman chat
 });
+
+Route::middleware('auth')->get('/api/user', function () {
+    return response()->json(Auth::user());
+});
+
 
 // Enrollment Routes
 Route::middleware('auth')->group(function () {
@@ -116,6 +121,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/classrooms/create', [ClassroomController::class, 'create'])->name('classrooms.create');
     Route::post('/classrooms', [ClassroomController::class, 'store'])->name('classrooms.store');
     Route::delete('/classrooms/{id}', [ClassroomController::class, 'destroy'])->middleware('auth');
+    Route::get('/classrooms/{id}', [ClassroomController::class, 'show'])->name('classrooms.show');
+    Route::get('/classrooms/{id}/students', [ClassroomController::class, 'showStudents'])->name('classrooms.showStudents');
+    Route::delete('/classrooms/{classroom}/students/{student}', [ClassroomController::class, 'removeStudent'])->name('classrooms.students.destroy');
 });
 
 // API: Mendapatkan Classrooms oleh Guru yang telah terautentikasi (untuk API)

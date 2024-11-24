@@ -15,7 +15,8 @@ class ChatController extends Controller
     {
         $chats = Chat::with('user')->where('class_id', $classId)->get();
 
-        return response()->json($chats);
+        return response()->json($chats, 200); // Pastikan ini adalah array
+
     }
 
     public function showChat($classId)
@@ -35,11 +36,15 @@ class ChatController extends Controller
         // Store the new message in the database
         $chat = new Chat();
         $chat->message = $request->message;
+        $request->validate([
+            'message' => 'required|string|max:255',
+        ]);
+        
         $chat->user_id = Auth::user()->id;
-        $chat->classroom_id = $classId;
+        $chat->class_id = $classId;
         $chat->save();
 
-        // Return the saved chat message as JSON response
+        $chat->load('user'); // Meload data user setelah disimpan
         return response()->json($chat, 201);
     }
 }

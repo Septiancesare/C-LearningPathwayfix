@@ -16,4 +16,8 @@ class Teacher extends Model
     {
         return $query->where('role', 'teacher');
     }
+    public function classrooms()
+    {
+        return $this->hasMany(Classroom::class, 'teacher_id');
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Inertia\Inertia;
+use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
@@ -24,7 +25,7 @@ class StudentController extends Controller
      */
     public function joinClassroom(Request $request)
     {
-        
+
         $request->validate([
             'enroll_code' => 'required|string',
         ]);
@@ -32,7 +33,7 @@ class StudentController extends Controller
         $classroom = Classroom::where('enrollkeyment', $request->enroll_code)->first();
         $auth = Auth::id();
 
-        
+
         if (!$classroom) {
             return back()->withErrors(['enroll_code' => 'Invalid enroll code.']);
         }
@@ -45,5 +46,16 @@ class StudentController extends Controller
 
 
         return redirect()->route('dashboard')->with('success', 'You have successfully joined the classroom!');
+    }
+    public function destroy($id)
+    {
+        $student = Student::find($id);
+
+        if ($student) {
+            $student->delete(); // Menghapus siswa dari database
+            return redirect()->back()->with('success', 'Student deleted successfully.');
+        }
+
+        return redirect()->back()->with('error', 'Student not found.');
     }
 }
