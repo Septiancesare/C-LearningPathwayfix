@@ -15,9 +15,9 @@ class MaterialController extends Controller
     {
         $classroom = Classroom::with('materials')->findOrFail($classId);
 
-        return Inertia::render('MaterialsPage', [
-            'classId' => $classId,
-            'materials' => $classroom->materials,
+        return Inertia::render('Materials/CreateMaterial', [
+            'class_id' => $classId,
+            'classrooms' => $classroom,
         ]);
     }
 
@@ -42,12 +42,12 @@ class MaterialController extends Controller
         ]);
 
         Material::create([
-            'classroom_id' => $classId,
+            'class_id' => $classId,
             'material_title' => $request->material_title,
             'materials_data' => $request->materials_data,
         ]);
 
-        return redirect()->route('materials.index', ['classId' => $classId])
+        return redirect()->route('materials.index', ['classroomId' => $classId])
             ->with('success', 'Material created successfully.');
     }
 

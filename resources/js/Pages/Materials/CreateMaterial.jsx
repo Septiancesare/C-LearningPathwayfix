@@ -1,14 +1,13 @@
-import React, { useState, useRef } from "react";
-import ReactQuill from "react-quill";
+import React, { useState } from "react";
 import { useDropzone } from "react-dropzone";
-import "react-quill/dist/quill.snow.css";
 import axios from "axios";
 import Authenticated from "@/Layouts/AuthenticatedLayout";
 
 const CreateMaterial = ({ classroomId }) => {
-    const [editorContent, setEditorContent] = useState("");
-    const quillRef = useRef(null); // Reference for ReactQuill
+    const [materialTitle, setMaterialTitle] = useState(""); // Untuk judul materi
+    const [materialContent, setMaterialContent] = useState(""); // Untuk konten materi
     const [isSubmitting, setIsSubmitting] = useState(false); // Loading state
+    const [uploadedImageUrl, setUploadedImageUrl] = useState(""); // Untuk URL gambar yang diunggah
 
     const handleImageUpload = async (file) => {
         const formData = new FormData();
@@ -22,15 +21,14 @@ const CreateMaterial = ({ classroomId }) => {
             });
 
             if (response.data.url) {
-                const fileUrl = response.data.url;
-                const quill = quillRef.current.getEditor();
-                const range = quill.getSelection();
-                quill.insertEmbed(range.index, "image", fileUrl);
+                setUploadedImageUrl(response.data.url);
+                alert("Gambar berhasil diunggah!");
             } else {
                 console.error("No URL returned from the server.");
             }
         } catch (error) {
             console.error("Error uploading image:", error);
+            alert("Gagal mengunggah gambar.");
         }
     };
 
@@ -42,19 +40,24 @@ const CreateMaterial = ({ classroomId }) => {
         },
     });
 
-    const handleEditorChange = (value) => {
-        setEditorContent(value);
-    };
-
     const handleSubmit = async () => {
+        if (!materialTitle || !materialContent) {
+            alert("Judul dan konten materi tidak boleh kosong.");
+            return;
+        }
+
         setIsSubmitting(true); // Set loading state
         try {
             await axios.post(`/classrooms/${classroomId}/materials/store`, {
-                material_title: "New Material",
+                material_title: materialTitle,
                 class_id: classroomId,
-                materials_data: editorContent,
+                materials_data: materialContent,
+                image_url: uploadedImageUrl,
             });
             alert("Material berhasil disimpan!");
+            setMaterialTitle("");
+            setMaterialContent("");
+            setUploadedImageUrl("");
         } catch (error) {
             console.error("Error submitting material:", error);
             alert("Terjadi kesalahan saat menyimpan material.");
@@ -64,7 +67,9 @@ const CreateMaterial = ({ classroomId }) => {
     };
 
     const handleCancel = () => {
-        setEditorContent("");
+        setMaterialTitle("");
+        setMaterialContent("");
+        setUploadedImageUrl("");
     };
 
     const handleBack = () => {
@@ -83,27 +88,39 @@ const CreateMaterial = ({ classroomId }) => {
                 >
                     <input {...getInputProps()} />
                     <p>
-                        Drag 'n' drop some files here, or click to select files
+                        Drag 'n' drop an image here, or click to select an image
                     </p>
                 </div>
-                <ReactQuill
-                    ref={quillRef}
-                    value={editorContent}
-                    onChange={handleEditorChange}
-                    placeholder="Write your material here..."
-                    modules={{
-                        toolbar: [
-                            [{ header: "1" }, { header: "2" }, { font: [] }],
-                            [{ list: "ordered" }, { list: "bullet" }],
-                            ["bold", "italic", "underline"],
-                            ["link", "image"],
-                            [{ align: [] }],
-                            [{ color: [] }, { background: [] }],
-                            ["clean"],
-                        ],
-                    }}
-                />
-
+                {uploadedImageUrl && (
+                    <div className="mt-2">
+                        <p>Uploaded Image:</p>
+                        <img
+                            src={uploadedImageUrl}
+                            alt="Uploaded"
+                            className="max-w-xs"
+                        />
+                    </div>
+                )}
+                <div className="mt-4">
+                    <label className="block mb-2 font-semibold">Title:</label>
+                    <input
+                        type="text"
+                        className="w-full border rounded px-3 py-2"
+                        value={materialTitle}
+                        onChange={(e) => setMaterialTitle(e.target.value)}
+                        placeholder="Enter material title"
+                    />
+                </div>
+                <div className="mt-4">
+                    <label className="block mb-2 font-semibold">Content:</label>
+                    <textarea
+                        className="w-full border rounded px-3 py-2"
+                        rows="10"
+                        value={materialContent}
+                        onChange={(e) => setMaterialContent(e.target.value)}
+                        placeholder="Write your material content here..."
+                    />
+                </div>
                 <div className="flex justify-between mt-4">
                     <button
                         className="bg-gray-500 text-white px-4 py-2 rounded"
