@@ -76,8 +76,10 @@ Route::middleware('auth')->group(function () {
 
 // Routes untuk Material (Autentikasi diperlukan)
 Route::middleware('auth')->group(function () {
+    Route::get('/classrooms/{classId}/materials', [MaterialController::class, 'index'])->name('materials.index');
     Route::get('/classrooms/{classId}/materials/create', [MaterialController::class, 'create'])->name('materials.create');
     Route::post('/classrooms/{classId}/materials/store', [MaterialController::class, 'store'])->name('materials.store');
+
 
     Route::get('/classrooms/{classId}/materials', [MaterialController::class, 'index'])->name('materials.index');
     Route::get('/materials/{id}', [MaterialController::class, 'show'])->name('materials.show');
@@ -95,6 +97,42 @@ Route::middleware('auth')->group(function () {
     Route::get('/tasks', [TaskController::class, 'index']);
     Route::post('/tasks', [TaskController::class, 'store']);
     Route::post('/tasks/{task}/submit', [SubmissionController::class, 'store']);
+    Route::get('/classrooms/{classroom}/tasks/{task}/edit', [TaskController::class, 'edit'])
+        ->name('tasks.edit');
+    Route::put('/classrooms/{classroom}/tasks/{task}', [TaskController::class, 'update'])
+        ->name('tasks.update');
+    Route::get('/tasks/{id}/show', [TaskController::class, 'show']);
+    Route::get('/tasks/{id}/showpage', [TaskController::class, 'showPage'])
+        ->name('tasks.show.page');
+    Route::get('/classrooms/{classroom}/tasks/{task}/submit', [TaskController::class, 'submitTaskPage'])
+        ->name('tasks.submit.page');
+
+    // Task Submission Routes
+    Route::get('/classrooms/{classroom}/tasks/{task}/submit', [SubmissionController::class, 'create'])
+        ->name('tasks.submit.page');
+
+    Route::post('/classrooms/{classroom}/tasks/{task}/submit', [SubmissionController::class, 'submit'])
+        ->name('tasks.submit');
+
+    Route::delete('/classrooms/{classroom}/tasks/{task}', [TaskController::class, 'destroy'])
+        ->name('tasks.destroy');
+
+
+    Route::get('/classrooms/{classroom}/tasks/{task}/edit', [TaskController::class, 'edit'])
+        ->name('tasks.edit');
+
+    Route::get('/classrooms/{classroom}/tasks/{task}/submissions', [TaskController::class, 'viewSubmissions'])
+        ->name('tasks.submissions');
+
+
+
+    // View and Grade Submission
+    Route::get('/classrooms/{classroom}/tasks/{task}/submissions/{submission}', [SubmissionController::class, 'view'])
+        ->name('submissions.view');
+    Route::put('/classrooms/{classroom}/tasks/{task}/submissions/{submission}/grade', [SubmissionController::class, 'grade'])
+        ->name('submissions.grade');
+    Route::get('/classrooms/{classroom}/tasks/{task}/submissions/{submission}/download', [SubmissionController::class, 'download'])
+        ->name('submissions.download');
 });
 
 // Route untuk Upload Gambar
@@ -113,6 +151,28 @@ Route::post('/upload-image', function (Request $request) {
     ]);
 })->middleware('auth');
 
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    // Existing routes
+    Route::get('/classrooms/{classId}/materials', [MaterialController::class, 'index'])
+        ->name('materials.index');
+    Route::get('/classrooms/{classId}/materials/create', [MaterialController::class, 'create'])
+        ->name('materials.create');
+    Route::post('/classrooms/{classId}/materials/store', [MaterialController::class, 'store'])
+        ->name('materials.store');
+
+    // New routes for update and delete
+    Route::get('/materials/{id}/edit', [MaterialController::class, 'edit'])
+        ->name('materials.edit');
+    Route::put('/materials/{id}', [MaterialController::class, 'update'])
+        ->name('materials.update');
+    Route::delete('/materials/{id}', [MaterialController::class, 'destroy'])
+        ->name('materials.destroy');
+});
+
+Route::get('/classrooms/{classId}/materials', [MaterialController::class, 'index']);
+Route::get('/materials/{id}/showpage', [MaterialController::class, 'showPage'])
+    ->name('materials.showpage');
 // Resource Routes untuk Classroom (Autentikasi diperlukan)
 Route::middleware('auth')->resource('classrooms', ClassroomController::class);
 
@@ -121,7 +181,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/classrooms/create', [ClassroomController::class, 'create'])->name('classrooms.create');
     Route::post('/classrooms', [ClassroomController::class, 'store'])->name('classrooms.store');
     Route::delete('/classrooms/{id}', [ClassroomController::class, 'destroy'])->middleware('auth');
-    Route::get('/classrooms/{id}', [ClassroomController::class, 'show'])->name('classrooms.show');
+    Route::get('/classrooms/{id}/show', [ClassroomController::class, 'show'])->name('classrooms.show');
     Route::get('/classrooms/{id}/students', [ClassroomController::class, 'showStudents'])->name('classrooms.showStudents');
     Route::delete('/classrooms/{classroom}/students/{student}', [ClassroomController::class, 'removeStudent'])->name('classrooms.students.destroy');
 });

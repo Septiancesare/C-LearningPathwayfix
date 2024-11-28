@@ -6,25 +6,27 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    public function up()
     {
         Schema::create('materials', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('class_id');
             $table->string('material_title');
-            $table->foreignId('class_id')->constrained('classrooms')->onDelete('cascade');
-            $table->longText('materials_data');
+            $table->text('materials_data');
+            $table->string('image_url')->nullable();
             $table->timestamps();
+
+            // Foreign key constraint
+            $table->foreign('class_id')
+                ->references('id')
+                ->on('classrooms')
+                ->onDelete('cascade');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('materials');
     }
-};
+}
+;

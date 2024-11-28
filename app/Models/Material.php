@@ -7,23 +7,20 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Material extends Model
 {
-    //
-    use HasFactory;
-
     protected $fillable = [
         'class_id',
         'material_title',
         'materials_data',
+        'image_url'
     ];
 
     public function classroom()
-{
-    return $this->belongsTo(Classroom::class, 'class_id');
-}
-
+    {
+        return $this->belongsTo(Classroom::class, 'classroom_id');
+    }
 
     public function user()
     {
-        return $this->belongsTo(User::class, 'user_id'); // Jika materi memiliki penulis
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

@@ -39,8 +39,6 @@ class Classroom extends Model
         return $this->hasMany(Material::class, 'class_id');
     }
 
-
-    // Relasi dengan tugas
     public function tasks()
     {
         return $this->hasMany(Task::class, 'classroom_id');

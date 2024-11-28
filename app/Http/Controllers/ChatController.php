@@ -27,6 +27,7 @@ class ChatController extends Controller
         // Pass data to the Inertia React component
         return Inertia::render('Classrooms/ChatPage', [
             'classId' => $classroom->id,
+            'nameClass' => $classroom->name,
         ]);
     }
 

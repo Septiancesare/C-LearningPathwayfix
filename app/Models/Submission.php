@@ -10,10 +10,12 @@ class Submission extends Model
     use HasFactory;
 
     protected $fillable = [
-        'task_id', 
-        'user_id', 
-        'content', 
+        'task_id',
+        'user_id',
         'file_path',
+        'notes',
+        'grade',
+        'feedback'
     ];
 
     public function task()

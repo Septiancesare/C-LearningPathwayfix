@@ -37,6 +37,9 @@ const ShowStudent = ({ classroom }) => {
                     <div className="bg-blue-600 text-center text-white p-2 my-3 border-2 rounded-lg hover:text-blue-600 hover:bg-transparent hover:border-2 hover:border-blue-600">
                         <Link href={`/dashboard`}>Dashboard</Link>
                     </div>
+                    <div className="bg-blue-600 text-center text-white p-2 my-3 border-2 rounded-lg hover:text-blue-600 hover:bg-transparent hover:border-2 hover:border-blue-600">
+                        <Link href={`/classrooms/page/${classroom.id}`}>Classroom</Link>
+                    </div>
                     <h2 className="text-lg font-bold text-center">
                         Classrooms
                     </h2>

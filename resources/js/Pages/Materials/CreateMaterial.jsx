@@ -1,9 +1,17 @@
 import React, { useState } from "react";
+import { usePage } from "@inertiajs/react";
 import { useDropzone } from "react-dropzone";
 import axios from "axios";
 import Authenticated from "@/Layouts/AuthenticatedLayout";
 
-const CreateMaterial = ({ classroomId }) => {
+const CreateMaterial = () => {
+    const { classroomId } = usePage().props;
+
+    console.log("Classroom ID:", classroomId);
+
+    const extractedClassroomId =
+        classroomId || window.location.pathname.split("/")[2];
+
     const [materialTitle, setMaterialTitle] = useState(""); // Untuk judul materi
     const [materialContent, setMaterialContent] = useState(""); // Untuk konten materi
     const [isSubmitting, setIsSubmitting] = useState(false); // Loading state
@@ -41,28 +49,43 @@ const CreateMaterial = ({ classroomId }) => {
     });
 
     const handleSubmit = async () => {
+        if (!extractedClassroomId) {
+            alert("Classroom ID tidak ditemukan!");
+            return;
+        }
+
         if (!materialTitle || !materialContent) {
             alert("Judul dan konten materi tidak boleh kosong.");
             return;
         }
 
-        setIsSubmitting(true); // Set loading state
+        setIsSubmitting(true);
         try {
-            await axios.post(`/classrooms/${classroomId}/materials/store`, {
-                material_title: materialTitle,
-                class_id: classroomId,
-                materials_data: materialContent,
-                image_url: uploadedImageUrl,
-            });
-            alert("Material berhasil disimpan!");
-            setMaterialTitle("");
-            setMaterialContent("");
-            setUploadedImageUrl("");
+            const response = await axios.post(
+                `/classrooms/${extractedClassroomId}/materials/store`, // Gunakan extractedClassroomId
+                {
+                    material_title: materialTitle,
+                    materials_data: materialContent,
+                    image_url: uploadedImageUrl,
+                }
+            );
+
+            alert(response.data.message);
+
+            if (response.data.redirect) {
+                window.location.href = response.data.redirect;
+            }
         } catch (error) {
-            console.error("Error submitting material:", error);
-            alert("Terjadi kesalahan saat menyimpan material.");
+            console.error(
+                "Error submitting material:",
+                error.response?.data?.message || error.message
+            );
+            alert(
+                error.response?.data?.message ||
+                    "Terjadi kesalahan saat menyimpan material."
+            );
         } finally {
-            setIsSubmitting(false); // Reset loading state
+            setIsSubmitting(false);
         }
     };
 
@@ -137,7 +160,9 @@ const CreateMaterial = ({ classroomId }) => {
                         </button>
                         <button
                             className={`bg-green-500 text-white px-4 py-2 rounded ${
-                                isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+                                isSubmitting
+                                    ? "opacity-50 cursor-not-allowed"
+                                    : ""
                             }`}
                             onClick={handleSubmit}
                             disabled={isSubmitting}

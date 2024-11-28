@@ -17,7 +17,7 @@ export default function Register() {
 
     const submit = (e) => {
         e.preventDefault();
-
+        console.log("Submitted Data:", data);
         post(route("register"), {
             onFinish: () => reset("password", "password_confirmation"),
         });

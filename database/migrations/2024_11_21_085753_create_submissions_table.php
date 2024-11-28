@@ -14,8 +14,11 @@ return new class extends Migration
         Schema::create('submissions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('task_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('file_path');
-            $table->integer('grade');
+            $table->text('notes')->nullable();
+            $table->decimal('grade', 5, 2)->nullable(); // Allow decimal grades
+            $table->text('feedback')->nullable();
             $table->timestamps();
         });
     }

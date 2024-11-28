@@ -1,28 +1,57 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link, usePage } from "@inertiajs/react";
 import Authenticated from "@/Layouts/AuthenticatedLayout";
+import axios from "axios";
 
 export default function ClassroomPage() {
     const { classroom } = usePage().props;
     const { user } = usePage().props.auth;
-    
 
-    {
-        classroom ? (
-            <div>
-                <h2>Teachers List</h2>
-                {classroom.teachers && classroom.teachers.length > 0 ? (
-                    classroom.teachers.map((teacher) => (
-                        <p key={teacher.id}>{teacher.name}</p>
-                    ))
-                ) : (
-                    <p>No teachers available</p>
-                )}
-            </div>
-        ) : (
-            <p>Loading...</p>
-        );
-    }
+    const [tasks, setTasks] = useState([]);
+    const [materials, setMaterials] = useState([]); // State untuk materials
+    const [isLoadingTasks, setIsLoadingTasks] = useState(true);
+    const [isLoadingMaterials, setIsLoadingMaterials] = useState(true);
+
+    useEffect(() => {
+        const fetchTasks = async () => {
+            try {
+                const response = await axios.get(
+                    `/classrooms/${classroom.id}/show`
+                );
+                setTasks(response.data.tasks || []);
+            } catch (error) {
+                console.error(
+                    "Error fetching tasks:",
+                    error.response ? error.response.data : error.message
+                );
+                // Optionally set an error state to show to the user
+            } finally {
+                setIsLoadingTasks(false);
+            }
+        };
+
+        const fetchMaterials = async () => {
+            try {
+                const response = await axios.get(
+                    `/classrooms/${classroom.id}/show`
+                );
+                setMaterials(response.data.materials || []);
+            } catch (error) {
+                console.error(
+                    "Error fetching materials:",
+                    error.response ? error.response.data : error.message
+                );
+                // Optionally set an error state to show to the user
+            } finally {
+                setIsLoadingMaterials(false);
+            }
+        };
+
+        if (classroom?.id) {
+            fetchTasks();
+            fetchMaterials();
+        }
+    }, [classroom?.id]);
 
     const isTeacher = user.role === "teacher";
 
@@ -40,83 +69,26 @@ export default function ClassroomPage() {
                 });
         }
     };
+
     return (
         <Authenticated>
             <div className="container flex">
                 {/* Sidebar */}
-                {/* Sidebar */}
                 <div className="w-1/4 h-svh p-4 bg-gray-200">
-                    <div className="bg-blue-600 text-center text-white p-2  my-3 border-2 rounded-lg hover:text-blue-600 hover:bg-transparent hover:border-2 hover:border-blue-600">
+                    <div className="bg-blue-600 text-center text-white p-2 my-3 border-2 rounded-lg hover:text-blue-600 hover:bg-transparent hover:border-2 hover:border-blue-600">
                         <Link href={`/dashboard`}>Dashboard</Link>
                     </div>
                     <h2 className="text-lg font-bold text-center">
                         My Classrooms
                     </h2>
-                    <ul>
-                        {user.role === "student" ? (
-                            classroom.students &&
-                            classroom.students.length > 0 ? (
-                                classroom.students.map((classItem) => (
-                                    <div
-                                        className="side bg-blue-300 p-2 border-l-4 border-blue-800"
-                                        key={classItem.id}
-                                    >
-                                        <li className="p-2">
-                                            <a
-                                                href={`/classrooms/${classItem.id}`}
-                                                className="text-lg"
-                                            >
-                                                {classItem.name}
-                                            </a>
-                                            <hr />
-                                            <ul className="my-3">
-                                                <li>Materials</li>
-                                                <li>Assignments</li>
-                                            </ul>
-                                        </li>
-                                    </div>
-                                ))
-                            ) : (
-                                <p>No classrooms available</p>
-                            )
-                        ) : user.role === "teacher" ? (
-                            classroom.teachers &&
-                            classroom.teachers.length > 0 ? (
-                                classroom.teachers.map((classItem) => (
-                                    <div
-                                        className="side bg-green-300 p-2 border-l-4 border-green-800"
-                                        key={classItem.id}
-                                    >
-                                        <li className="p-2">
-                                            <a
-                                                href={`/classrooms/${classItem.id}`}
-                                                className="text-lg"
-                                            >
-                                                {classItem.name}
-                                            </a>
-                                            <hr />
-                                            <ul className="my-3">
-                                                <li>Materials</li>
-                                                <li>Assignments</li>
-                                            </ul>
-                                        </li>
-                                    </div>
-                                ))
-                            ) : (
-                                <p>No classrooms available</p>
-                            )
-                        ) : (
-                            <p>Invalid user role</p>
-                        )}
-                    </ul>
                 </div>
 
                 {/* Main Content */}
-                <div className="w-full p-6 ">
-                    <div className="py-2 flex ">
-                        <div className="w-full sm:px-6 lg:px-8 flex flex-col justify-center ">
-                            <div className="overflow-hidden w-full bg-[#006DFF] shadow-sm sm:rounded-lg ">
-                                <div className="greeting p-9 ">
+                <div className="w-full p-6">
+                    <div className="py-2 flex">
+                        <div className="w-full sm:px-6 lg:px-8 flex flex-col justify-center">
+                            <div className="overflow-hidden w-full bg-[#006DFF] shadow-sm sm:rounded-lg">
+                                <div className="greeting p-9">
                                     <h1 className="text-white py-3 font-bold text-5xl">
                                         {classroom.name}
                                     </h1>
@@ -190,29 +162,88 @@ export default function ClassroomPage() {
                     </div>
 
                     <div className="p-6">
+                        {/* Materials Section */}
                         <div className="mt-6">
                             <h3 className="text-lg font-bold">Materials</h3>
-                            {classroom.materials &&
-                            classroom.materials.length > 0 ? (
-                                classroom.materials.map((material) => (
-                                    <div key={material.id}>{material.name}</div>
+                            {isLoadingMaterials ? (
+                                <p>Loading materials...</p>
+                            ) : materials && materials.length > 0 ? (
+                                materials.map((material) => (
+                                    <div
+                                        className="bg-blue-200 p-4 rounded-md mb-3"
+                                        key={material.id}
+                                    >
+                                        <Link
+                                            href={`/materials/${material.id}/showpage`}
+                                        >
+                                            <div className="flex gap-5 items-center">
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    viewBox="0 0 512 512"
+                                                    className="w-10 h-10"
+                                                >
+                                                    <path d="M96 0C43 0 0 43 0 96L0 416c0 53 43 96 96 96l288 0 32 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l0-64c17.7 0 32-14.3 32-32l0-320c0-17.7-14.3-32-32-32L384 0 96 0zm0 384l256 0 0 64L96 448c-17.7 0-32-14.3-32-32s14.3-32 32-32zm32-240c0-8.8 7.2-16 16-16l192 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-192 0c-8.8 0-16-7.2-16-16zm16 48l192 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-192 0c-8.8 0-16-7.2-16-16s7.2-16 16-16z" />
+                                                </svg>
+                                                <div>
+                                                    <h2 className="text-2xl">
+                                                        {
+                                                            material.material_title
+                                                        }
+                                                    </h2>
+                                                    <p className="text-gray-600">
+                                                        {material.created_at}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </Link>
+                                    </div>
                                 ))
                             ) : (
                                 <p>No materials available</p>
                             )}
                         </div>
 
-                        <div className="mt-6">
+                        {/* Tasks Section */}
+                        <div className="classPage mt-6">
                             <h3 className="text-lg font-bold">Assignments</h3>
-                            {classroom.assignments &&
-                            classroom.assignments.length > 0 ? (
-                                classroom.assignments.map((assignment) => (
-                                    <div key={assignment.id}>
-                                        {assignment.title}
+                            {isLoadingTasks ? (
+                                <p>Loading tasks...</p>
+                            ) : tasks && tasks.length > 0 ? (
+                                tasks.map((task) => (
+                                    <div
+                                        className="bg-blue-200 p-4 rounded-md mb-2"
+                                        key={task.id}
+                                    >
+                                        <Link
+                                            href={
+                                                user.role === "teacher"
+                                                    ? `/tasks/${task.id}/showpage`
+                                                    : `/classrooms/${classroom.id}/tasks/${task.id}/submit`
+                                            }
+                                        >
+                                            <div className="flex gap-5 items-center">
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    viewBox="0 0 512 512"
+                                                    className="w-10 h-10"
+                                                >
+                                                    <path d="M152.1 38.2c9.9 8.9 10.7 24 1.8 33.9l-72 80c-4.4 4.9-10.6 7.8-17.2 7.9s-12.9-2.4-17.6-7L7 113C-2.3 103.6-2.3 88.4 7 79s24.6-9.4 33.9 0l22.1 22.1 55.1-61.2c8.9-9.9 24-10.7 33.9-1.8zm0 160c9.9 8.9 10.7 24 1.8 33.9l-72 80c-4.4 4.9-10.6 7.8-17.2 7.9s-12.9-2.4-17.6-7L7 273c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l22.1 22.1 55.1-61.2c8.9-9.9 24-10.7 33.9-1.8zM224 96c0-17.7 14.3-32 32-32l224 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-224 0c-17.7 0-32-14.3-32-32zm0 160c0-17.7 14.3-32 32-32l224 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-224 0c-17.7 0-32-14.3-32-32zM160 416c0-17.7 14.3-32 32-32l288 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-288 0c-17.7 0-32-14.3-32-32zM48 368a48 48 0 1 1 0 96 48 48 0 1 1 0-96z" />
+                                                </svg>
+                                                <div>
+                                                    <h2 className="text-2xl">
+                                                        {task.title}
+                                                    </h2>
+                                                    <p className="text-red-500">
+                                                        Due date:{" "}
+                                                        {task.due_date}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </Link>
                                     </div>
                                 ))
                             ) : (
-                                <p>No assignments available</p>
+                                <p>No tasks available</p>
                             )}
                         </div>
                     </div>

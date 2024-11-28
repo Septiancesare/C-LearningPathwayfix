@@ -40,12 +40,16 @@ class ClassroomController extends Controller
     public function show($id)
     {
 
-        $classroom = Classroom::with(['materials', 'tasks', 'teachers'])->findOrFail($id);
-        $materials = Material::where('class_id', $classroom)->get();
-        $tasks = Task::where('classroom_id', $classroom)->get();
+        $classroom = Classroom::with(['materials', 'tasks', 'teacher'])->findOrFail($id);
+        $materials = Material::where('class_id', $classroom->id)->get();
+        $tasks = Task::where('classroom_id', $classroom->id)->get();
 
 
-        return response()->json($classroom, $tasks, $materials);
+        return response()->json([
+            'classroom' => $classroom,
+            'materials' => $classroom->materials,
+            'tasks' => $classroom->tasks,
+        ]);
     }
 
 
