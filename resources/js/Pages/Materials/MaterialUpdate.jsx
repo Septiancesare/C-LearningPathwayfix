@@ -24,7 +24,7 @@ export default function MaterialUpdate({ material, classId }) {
             <div className="container mx-auto p-6">
                 <h1 className="text-2xl font-bold mb-6">Update Material</h1>
 
-                <form onSubmit={handleSubmit} className="max-w-lg">
+                <form onSubmit={handleSubmit} className="">
                     <div className="mb-4">
                         <label className="block text-gray-700 text-sm font-bold mb-2">
                             Material Title
